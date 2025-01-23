@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($gebruiker && password_verify($saltedWachtwoord, $gebruiker['password'])) {
         $_SESSION['gebruiker_id'] = $gebruiker['idaccount'];
         $_SESSION['gebruikersnaam'] = $gebruiker['username'];
+        $_SESSION['userrol'] = $gebruiker['gebruikerrol'];
         header('location: overzicht.php');
         exit;
     } else {

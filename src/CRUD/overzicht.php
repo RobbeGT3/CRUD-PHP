@@ -9,15 +9,16 @@
 <body>
     <script src="Popup.js"></script>
     <div class = 'container'>
-        <h1>Personen</h1>
+    <h1>Personen</h1>
+    <p>Welcome, guest</p>
         <table>
             <tr>
-                <th>persoonnummer</th>
-                <th>voornaam</th>
-                <th>tussenvoegsel</th>
-                <th>achternaam</th>
-                <th>geboortedatum</th>
-                <th>email</th>
+                <th>Persoonnummer</th>
+                <th>Voornaam</th>
+                <th>Tussenvoegsel</th>
+                <th>Achternaam</th>
+                <th>Geboortedatum</th>
+                <th>Email</th>
             </tr>
             <?php
             $conn =  require_once "common/connection.php";
@@ -26,13 +27,9 @@
             $stmt->execute();
             $result = $stmt->get_result();
 
-            // if ($result->num_rows == 0) {
-            //     exit('No rows');
-            // }
-
             while($row = $result->fetch_assoc()){
                 echo "<tr>";
-                echo "<td> <a href='details.php?id=" . $row['persoonnummer'] . "'>" . $row['persoonnummer'] . "</a></td>";
+                echo "<td> <a href='update_user.php?id=" . $row['persoonnummer'] . "'>" . $row['persoonnummer'] . "</a></td>";
                 echo "<td>" . $row['voornaam'] . "</td>";
                 echo "<td>" . $row['tussenvoegsel'] . "</td>";
                 echo "<td>" . $row['achternaam'] . "</td>";
