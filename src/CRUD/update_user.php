@@ -100,12 +100,12 @@
 
         }
 
-        $minimumwachtwoorlengte = 8;
+        $minimumwachtwoordlengte = 8;
 
         //Check of het wachtwoord korter is dan de minimum wachtwoord lengte
-        if(strlen($wachtwoord) < $minimumwachtwoorlengte){
+        if(strlen($wachtwoord) < $minimumwachtwoordlengte){
             echo "<script type='text/javascript'>
-            alert('Wachtwoord moet minimaal ". $minimumwachtwoorlengte. " karakters lang zijn.');
+            alert('Wachtwoord moet minimaal ". $minimumwachtwoordlengte. " karakters lang zijn.');
             </script>";
         }else{
 

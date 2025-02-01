@@ -25,9 +25,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $wachtwoord = $_POST['password'];
 
     //Check of het wachtwoord korter is dan de minimum wachtwoord lengte
-    if(strlen($wachtwoord) < $minimumwachtwoorlengte){
+    if(strlen($wachtwoord) < $minimumwachtwoordlengte){
         echo "<script type='text/javascript'>
-            alert('Wachtwoord moet minimaal ". $minimumwachtwoorlengte. " karakters lang zijn.');
+            alert('Wachtwoord moet minimaal ". $minimumwachtwoordlengte. " karakters lang zijn.');
             </script>";
     }else{
         $stmt1 = $conn->prepare("INSERT INTO users (persoonnummer, voornaam, tussenvoegsel, achternaam, geboortedatum, email) VALUES (NULL,?,?,?,?,?)");
