@@ -1,3 +1,29 @@
+<?php 
+session_start();
+
+//Checked of the gebruiker is ingelogd
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    die("Page not available");
+}
+
+$conn =  require_once "common/connection.php";
+
+
+//Data voor het overzicht
+$stmt1 = $conn->prepare("SELECT persoonnummer,voornaam,tussenvoegsel,achternaam,geboortedatum,email FROM users;");
+$stmt1->execute();
+$result1 = $stmt1->get_result();
+
+
+//Gegevens voor customized text per gebruiker.
+$stmt2 = $conn->prepare("SELECT voornaam,tussenvoegsel,achternaam FROM users WHERE persoonnummer = ?;");
+$stmt2->bind_param("i", $_SESSION['persoonnummer_id']);
+$stmt2->execute();
+$result2 = $stmt2->get_result();
+$gebruiker = $result2->fetch_assoc();
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +33,11 @@
     <link rel="stylesheet" href="Styles/style.css">
 </head>
 <body>
-    <script src="Popup.js"></script>
+    <script src="script.js"></script>
     <div class = 'container'>
-    <h1>Personen</h1>
-    <p>Welcome, guest</p>
+        <h1>Personen</h1>
+        <p>Welcome, <?php echo $gebruiker['voornaam']." ".$gebruiker['tussenvoegsel']." ".$gebruiker['achternaam']?></p>
+        <button onClick="window.location.href='logout.php'">uitloggen</button>
         <table>
             <tr>
                 <th>Persoonnummer</th>
@@ -21,13 +48,8 @@
                 <th>Email</th>
             </tr>
             <?php
-            $conn =  require_once "common/connection.php";
 
-            $stmt = $conn->prepare("SELECT persoonnummer,voornaam,tussenvoegsel,achternaam,geboortedatum,email FROM users;");
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            while($row = $result->fetch_assoc()){
+            while($row = $result1->fetch_assoc()){
                 echo "<tr>";
                 echo "<td> <a href='update_user.php?id=" . $row['persoonnummer'] . "'>" . $row['persoonnummer'] . "</a></td>";
                 echo "<td>" . $row['voornaam'] . "</td>";
@@ -40,7 +62,7 @@
             }
             ?>
         </table>
-        <button class = 'updateButton' onClick="document.location.href='create_user.php'">Voeg persoon toe</button>
+        <button class = 'updateButton' onClick="window.location.href='create_user.php'">Voeg persoon toe</button>
     </div>
     <div class="overlay" id="overlay"></div>
     <div class="popup" id="popup">
@@ -48,6 +70,7 @@
         <button class="popup-button" onclick="deleteRecord()">Verwijderen</button>
         <button class="close-popup" onclick="closePopup()" >Cancel</button>
     </div>
+    
     
 </body>
 </html>

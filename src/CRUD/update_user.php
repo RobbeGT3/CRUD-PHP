@@ -1,4 +1,10 @@
 <?php
+    session_start();
+
+    if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+        die("Page not available");
+    }
+
     $conn = require_once "common/connection.php";
 
     function fetchUserInfo($conn, $query, $paramTypes, $params){
@@ -48,7 +54,7 @@
         $paramsUsers = [];
         
 
-        // Check of user velden zijn ingevuld
+        // Check of user velden waarden zijn veranderd.
         if ($_POST['fname'] !== $gebruikerinfo['voornaam']) {
             $bijgewerkteVeldenUsers[] = "voornaam = ?";
             $paramsUsers[] = $_POST['fname'];
@@ -94,33 +100,44 @@
 
         }
 
-        // Voert uit als gebruiker data is ingevoerd
-        if (!empty($bijgewerkteVeldenUsers)) {
-            $sqlUsers = "UPDATE users SET " . implode(", ", $bijgewerkteVeldenUsers) . " WHERE persoonnummer = ?";
-            $stmt = $conn->prepare($sqlUsers);
-            $paramsUsers[] = $persoonnummer;
-            $stmt->bind_param(str_repeat("s", count($paramsUsers)), ...$paramsUsers);
-            $stmt->execute();
-            $stmt->close();
-        }
+        $minimumwachtwoorlengte = 8;
 
-        // Voert uit als account data is ingevoerd
-        if (!empty($bijgewerkteVeldenAccounts)) {
-            $sqlAccounts = "UPDATE accounts SET " . implode(", ", $bijgewerkteVeldenAccounts) . " WHERE persoonnummer = ?";
-            $stmt = $conn->prepare($sqlAccounts);
-            $paramsAccounts[] = $persoonnummer; 
-            $stmt->bind_param(str_repeat("s", count($paramsAccounts)), ...$paramsAccounts);
-            $stmt->execute();
-            $stmt->close();
-        }
-
+        //Check of het wachtwoord korter is dan de minimum wachtwoord lengte
+        if(strlen($wachtwoord) < $minimumwachtwoorlengte){
             echo "<script type='text/javascript'>
-            alert('User is aangepast');
-            window.location.href = 'overzicht.php'; 
+            alert('Wachtwoord moet minimaal ". $minimumwachtwoorlengte. " karakters lang zijn.');
             </script>";
-            //Misschien nog veranderen naar document.location als dat nodig is.
+        }else{
 
-            exit();
+            // Voert uit als gebruiker data is ingevoerd
+            if (!empty($bijgewerkteVeldenUsers)) {
+                $sqlUsers = "UPDATE users SET " . implode(", ", $bijgewerkteVeldenUsers) . " WHERE persoonnummer = ?";
+                $stmt = $conn->prepare($sqlUsers);
+                $paramsUsers[] = $persoonnummer;
+                $stmt->bind_param(str_repeat("s", count($paramsUsers)), ...$paramsUsers);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+            // Voert uit als account data is ingevoerd
+            if (!empty($bijgewerkteVeldenAccounts)) {
+                $sqlAccounts = "UPDATE accounts SET " . implode(", ", $bijgewerkteVeldenAccounts) . " WHERE persoonnummer = ?";
+                $stmt = $conn->prepare($sqlAccounts);
+                $paramsAccounts[] = $persoonnummer; 
+                $stmt->bind_param(str_repeat("s", count($paramsAccounts)), ...$paramsAccounts);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+                echo "<script type='text/javascript'>
+                alert('User is aangepast');
+                window.location.href = 'overzicht.php'; 
+                </script>";
+
+                exit();
+
+            }
+        
 
         
 

@@ -1,9 +1,15 @@
 <?php
+
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    die("Page not available");
+}
+
 header('Content-Type: application/json');
 
 $conn = require_once "common/connection.php";
 
-$data = json_decode(file_get_contents('php://input'), true);
+//vertaald een json string.
+$data = json_decode(file_get_contents('php://input'), true); 
 
 if (isset($data['persoonnummer'])) {
     $persoonnummer = $data['persoonnummer'];

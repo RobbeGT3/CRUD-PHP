@@ -1,6 +1,8 @@
 <?php
 
-$errorMessage = NULL;
+session_start();
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn =  require_once "common/connection.php";
     $gebruikersnaam = $_POST['username'];
@@ -18,13 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
 
     if ($gebruiker && password_verify($saltedWachtwoord, $gebruiker['password'])) {
-        $_SESSION['gebruiker_id'] = $gebruiker['idaccount'];
-        $_SESSION['gebruikersnaam'] = $gebruiker['username'];
-        $_SESSION['userrol'] = $gebruiker['gebruikerrol'];
+        $_SESSION['persoonnummer_id'] = $gebruiker['persoonnummer'];
+        $_SESSION['is_logged_in'] = true;
         header('location: overzicht.php');
         exit;
     } else {
-        $errorMessage =  "Ongeldige gebruikersnaam of wachtwoord.";
+        header('location: login.php?error=Verkeerde Inloggegevens');
     }
 
     $stmt->close();
@@ -45,17 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <h1>Login</h1>
         <form action="login.php" method="POST">
+            <?php 
+            if (isset($_GET['error'])) {
+                echo "<div class='error'>".htmlspecialchars($_GET['error'])."</div>";
+            } 
+            ?>
             <div class="form-group">
                 <input type="text" id="username" name="username" placeholder="Gebruikersnaam" required>
             </div>
             <div class="form-group">
                 <input type="password" id="password" name="password" placeholder="Wachtwoord" required>
             </div>
-            <?php 
-            if ($errorMessage != NULL ) {
-                echo "<div>".$errorMessage."</div>";
-            } 
-            ?>
             <button type="submit" class="login-button">Login</button>
         </form>
     </div>

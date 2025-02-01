@@ -1,44 +1,60 @@
 <?php 
+
+session_start();
+
+if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+    die("Page not available");
+}
+
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     $conn = require_once "common/connection.php";
+    $minimumwachtwoorlengte = 8;
 
     $voornaam = $_POST['fname'];
     $tussenvoegsel = $_POST['tname'];
     $achternaam = $_POST['lname'];
-
+    
     if(!empty($_POST['dob'])){
         $geboortedatum = $_POST['dob'];
     }else{
         $geboortedatum = NULL;
     }
-    
     $email = $_POST['email'];
+    $gebruikersnaam = $_POST['username'];
+    $wachtwoord = $_POST['password'];
 
-    $stmt1 = $conn->prepare("INSERT INTO users (persoonnummer, voornaam, tussenvoegsel, achternaam, geboortedatum, email) VALUES (NULL,?,?,?,?,?)");
-    $stmt1->bind_param("sssss", $voornaam, $tussenvoegsel, $achternaam,$geboortedatum,$email);
-    $stmt1->execute();
-    if($stmt1->affected_rows > 0){
-        $userID = $conn->insert_id;
+    //Check of het wachtwoord korter is dan de minimum wachtwoord lengte
+    if(strlen($wachtwoord) < $minimumwachtwoorlengte){
+        echo "<script type='text/javascript'>
+            alert('Wachtwoord moet minimaal ". $minimumwachtwoorlengte. " karakters lang zijn.');
+            </script>";
+    }else{
+        $stmt1 = $conn->prepare("INSERT INTO users (persoonnummer, voornaam, tussenvoegsel, achternaam, geboortedatum, email) VALUES (NULL,?,?,?,?,?)");
+        $stmt1->bind_param("sssss", $voornaam, $tussenvoegsel, $achternaam,$geboortedatum,$email);
+        $stmt1->execute();
+        if($stmt1->affected_rows > 0){
+            $userID = $conn->insert_id;
 
-        $gebruikersnaam = $_POST['username'];
-        $wachtwoord = $_POST['password'];
+            $salt = "9Q3z8T";
+            $saltedWachtwoord = $wachtwoord.$salt;
+            $hashedWachtwoord = password_hash($saltedWachtwoord, PASSWORD_DEFAULT);
 
-        $salt = "9Q3z8T";
-        $saltedWachtwoord = $wachtwoord.$salt;
-        $hashedWachtwoord = password_hash($saltedWachtwoord, PASSWORD_DEFAULT);
+            $aanmaking_account = date("Y-m-d");
+            $gebruikerrol = $_POST['UserRol'];
 
-        $aanmaking_account = date("Y-m-d");
-        $gebruikerrol = $_POST['UserRol'];
+            $stmt2 = $conn->prepare("INSERT INTO accounts (idaccount, username, password, aangemaakt, gebruikerrol, persoonnummer) VALUES (NULL,?,?,?,?,?)");
+            $stmt2->bind_param('sssii', $gebruikersnaam, $hashedWachtwoord, $aanmaking_account, $gebruikerrol, $userID);
+            $stmt2->execute();
+            $stmt2->close();
+        }
+        $stmt1->close();
+        $conn->close();
+        header('location: overzicht.php');
 
-        $stmt2 = $conn->prepare("INSERT INTO accounts (idaccount, username, password, aangemaakt, gebruikerrol, persoonnummer) VALUES (NULL,?,?,?,?,?)");
-        $stmt2->bind_param('sssii', $gebruikersnaam, $hashedWachtwoord, $aanmaking_account, $gebruikerrol, $userID);
-        $stmt2->execute();
-        $stmt2->close();
     }
-    $stmt1->close();
-    $conn->close();
-    header('location: overzicht.php');
+
+    
 }
 ?>
 

@@ -11,8 +11,33 @@
 <body>
 
   <?php
-  $datum = date("Y-m-d");
-  echo $datum;
+
+$error = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'];
+    $minLength = 5;
+
+    if (strlen($username) < $minLength) {
+      echo "<script type='text/javascript'>
+      alert('Wachtwoord moet minimaal ". $minLength. " karakters lang zijn.');
+      </script>";
+    } else {
+        echo "Form submitted successfully!";
+        echo "<script type='text/javascript'>
+        alert('Succesfull submitted');
+        </script>";
+        exit;
+    }
+}
+?>
+
+<form method="POST" action="">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+    <span style="color:red;"><?= $error ?></span>
+    <button type="submit">Submit</button>
+</form>
+
   ?>
 
 </body>
