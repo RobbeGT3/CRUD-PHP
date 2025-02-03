@@ -29,10 +29,10 @@
         $persoonnummer = $_GET['id'];
 
         $query1 = "SELECT voornaam, tussenvoegsel, achternaam, geboortedatum, email FROM users WHERE persoonnummer = ?";
-        $gebruikerinfo = fetchUserInfo($conn, $query1, "s", [$persoonnummer]);
+        $gebruikerinfo = fetchUserInfo($conn, $query1, "i", [$persoonnummer]);
 
         $query2 = "SELECT username, password FROM accounts WHERE persoonnummer = ?";
-        $accountinfo = fetchUserInfo($conn, $query2, "s", [$persoonnummer]);
+        $accountinfo = fetchUserInfo($conn, $query2, "i", [$persoonnummer]);
 
         if (!$gebruikerinfo) {
             die("User not found.");
@@ -85,13 +85,26 @@
             $bijgewerkteVeldenAccounts[] = "username = ?";
             $paramsAccounts[] = $_POST['username'];
         }
-        if (!empty($_POST['password'])) { 
-            $bijgewerkteVeldenAccounts[] = "password = ?";
+        if (!empty($_POST['password'])) {
+            
+            
+            $minimumwachtwoordlengte = 8;
             $wachtwoord = $_POST['password'];
-            $salt = "9Q3z8T";
-            $saltedWachtwoord = $wachtwoord.$salt;
-            $hashedWachtwoord = password_hash($saltedWachtwoord, PASSWORD_DEFAULT);
-            $paramsAccounts[] = $hashedWachtwoord;
+            
+            if(strlen($wachtwoord)<$minimumwachtwoordlengte){
+
+                echo "<script type='text/javascript'>
+                alert('Wachtwoord moet minimaal ". $minimumwachtwoordlengte. " karakters lang zijn. Wachtwoord is niet aangepast');
+                </script>";
+
+            }else{
+                $bijgewerkteVeldenAccounts[] = "password = ?";
+                $salt = "9Q3z8T";
+                $saltedWachtwoord = $wachtwoord.$salt;
+                $hashedWachtwoord = password_hash($saltedWachtwoord, PASSWORD_DEFAULT);
+                $paramsAccounts[] = $hashedWachtwoord;
+
+            }
         }
 
         if(!empty($bijgewerkteVeldenUsers)||!empty($bijgewerkteVeldenAccounts)){
@@ -100,43 +113,35 @@
 
         }
 
-        $minimumwachtwoordlengte = 8;
+        
 
         //Check of het wachtwoord korter is dan de minimum wachtwoord lengte
-        if(strlen($wachtwoord) < $minimumwachtwoordlengte){
-            echo "<script type='text/javascript'>
-            alert('Wachtwoord moet minimaal ". $minimumwachtwoordlengte. " karakters lang zijn.');
-            </script>";
-        }else{
-
-            // Voert uit als gebruiker data is ingevoerd
-            if (!empty($bijgewerkteVeldenUsers)) {
+        // Voert uit als gebruiker data is ingevoerd
+        if (!empty($bijgewerkteVeldenUsers)) {
                 $sqlUsers = "UPDATE users SET " . implode(", ", $bijgewerkteVeldenUsers) . " WHERE persoonnummer = ?";
                 $stmt = $conn->prepare($sqlUsers);
                 $paramsUsers[] = $persoonnummer;
                 $stmt->bind_param(str_repeat("s", count($paramsUsers)), ...$paramsUsers);
                 $stmt->execute();
                 $stmt->close();
-            }
+        }
 
             // Voert uit als account data is ingevoerd
-            if (!empty($bijgewerkteVeldenAccounts)) {
+        if (!empty($bijgewerkteVeldenAccounts)) {
                 $sqlAccounts = "UPDATE accounts SET " . implode(", ", $bijgewerkteVeldenAccounts) . " WHERE persoonnummer = ?";
                 $stmt = $conn->prepare($sqlAccounts);
                 $paramsAccounts[] = $persoonnummer; 
                 $stmt->bind_param(str_repeat("s", count($paramsAccounts)), ...$paramsAccounts);
                 $stmt->execute();
                 $stmt->close();
-            }
+        }
 
-                echo "<script type='text/javascript'>
-                alert('User is aangepast');
-                window.location.href = 'overzicht.php'; 
-                </script>";
+        echo "<script type='text/javascript'>
+        alert('User is aangepast');
+        window.location.href = 'overzicht.php'; 
+        </script>";
 
-                exit();
-
-            }
+        exit();
         
 
         
@@ -196,7 +201,7 @@
                 </div>
                 <div class="insert-group">
                     <label for="password">New Wachtwoord:</label>
-                    <input type="password" id="password" name="password" minlength ="8" placeholder="New Password">
+                    <input type="password" id="password" name="password" placeholder="New Password">
                 </div>
             </div>
             
