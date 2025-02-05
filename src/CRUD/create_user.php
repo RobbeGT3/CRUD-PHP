@@ -9,7 +9,7 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     $conn = require_once "common/connection.php";
-    $minimumwachtwoorlengte = 8;
+    $minimumwachtwoordlengte = 8;
 
     $voornaam = $_POST['fname'];
     $tussenvoegsel = $_POST['tname'];
@@ -30,6 +30,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             alert('Wachtwoord moet minimaal ". $minimumwachtwoordlengte. " karakters lang zijn.');
             </script>";
     }else{
+        header('location: overzicht.php');
         $stmt1 = $conn->prepare("INSERT INTO users (persoonnummer, voornaam, tussenvoegsel, achternaam, geboortedatum, email) VALUES (NULL,?,?,?,?,?)");
         $stmt1->bind_param("sssss", $voornaam, $tussenvoegsel, $achternaam,$geboortedatum,$email);
         $stmt1->execute();
@@ -50,9 +51,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         }
         $stmt1->close();
         $conn->close();
-        header('location: overzicht.php');
+        exit;
 
     }
+    
 
     
 }
