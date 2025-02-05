@@ -17,7 +17,9 @@ function deleteRecord() {
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ persoonnummer: currentPersoonnummer }),
+          body: JSON.stringify({ 
+            persoonnummer: currentPersoonnummer
+           }),
       })
       .then(response => response.text()) 
       .then(data => {
